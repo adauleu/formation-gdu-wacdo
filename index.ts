@@ -1,7 +1,8 @@
 import express from 'express';
 import { connectDB } from './config/db.ts';
-// import projectsRoute from './routes/projects.route.ts';
-// import users from './routes/users.route.ts';
+import productsRoute from './routes/product.route.ts';
+import ordersRoute from './routes/order.route.ts';
+import menusRoute from './routes/menu.route.ts';
 import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
@@ -23,8 +24,9 @@ app.use(express.static('uploads'));
 
 connectDB()
 
-// app.use('/api/projects', projectsRoute);
-// app.use('/api/users', users);
+app.use('/api/products', productsRoute);
+app.use('/api/orders', ordersRoute);
+app.use('/api/menus', menusRoute);
 
 
 // Start the server

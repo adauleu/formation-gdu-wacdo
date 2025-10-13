@@ -38,8 +38,11 @@ export async function createProduct(req: Request, res: Response) {
         if (!price) {
             return res.status(400).json({ message: 'Price is required' });
         }
+        const existingProduct = await Product.findOne({ name });
+        if (existingProduct) {
+            return res.status(409).json({ message: 'This product already exists' });
+        }
         const image = req.file ? req.file.path : undefined;
-
 
         const newProduct = new Product({
             name,

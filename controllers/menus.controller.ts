@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { Menu } from '../models/Menu.ts';
 import mongoose from 'mongoose';
 import { Product } from '../models/Product.ts';
+import type { AuthRequest } from '../middleware/auth.ts';
 
 export async function getMenus(req: Request, res: Response) {
     try {
@@ -12,7 +13,7 @@ export async function getMenus(req: Request, res: Response) {
     }
 }
 
-export async function getMenuById(req: Request, res: Response) {
+export async function getMenuById(req: AuthRequest, res: Response) {
     const { id } = req.params;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid menu ID' });

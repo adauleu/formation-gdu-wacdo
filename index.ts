@@ -1,8 +1,9 @@
 import express from 'express';
 import { connectDB } from './config/db.ts';
-import productsRoute from './routes/product.route.ts';
-import ordersRoute from './routes/order.route.ts';
-import menusRoute from './routes/menu.route.ts';
+import productsRoute from './routes/products.route.ts';
+import ordersRoute from './routes/orders.route.ts';
+import menusRoute from './routes/menus.route.ts';
+import usersRoute from './routes/users.route.ts';
 import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
@@ -27,7 +28,7 @@ connectDB()
 app.use('/api/products', productsRoute);
 app.use('/api/orders', ordersRoute);
 app.use('/api/menus', menusRoute);
-
+app.use('/api/users', usersRoute);
 
 // Start the server
 app.listen(process.env.PORT, () => {

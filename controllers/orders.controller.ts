@@ -1,14 +1,16 @@
 import type { Request, Response } from 'express';
 import { Menu } from '../models/Menu.ts';
 import mongoose from 'mongoose';
-import { Order } from '../models/Order.ts';
+import { Order, statuses } from '../models/Order.ts';
+import type { AuthRequest } from '../middleware/auth.ts';
+import type { JWTUser } from '../types.ts';
 
 export async function getOrders(req: Request, res: Response) {
     try {
         const menus = await Menu.find({}, 'name price').sort({ createdAt: -1 });
         res.status(200).json(menus);
     } catch (error) {
-        res.status(500).json({ message: 'Error retrieving menus', error });
+        res.status(500).json({ message: 'Error retrieving orders', error });
     }
 }
 
@@ -21,7 +23,7 @@ export async function getOrderById(req: Request, res: Response) {
     try {
         const product = await Order.findById(id).select('products menus statuses').populate('products menus');
         if (!product) {
-            return res.status(404).json({ message: 'Ordfer not found' });
+            return res.status(404).json({ message: 'Order not found' });
         }
         res.status(200).json(product);
     } catch (error) {
@@ -50,17 +52,26 @@ export async function createOrder(req: Request, res: Response) {
     }
 }
 
-export async function updateOrderStatus(req: Request, res: Response) {
+export async function updateOrderStatus(req: AuthRequest, res: Response) {
     const { id } = req.params;
     const { status } = req.body;
+    const role = req.user?.role as JWTUser['role'];
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: 'Invalid project ID' });
+        return res.status(400).json({ message: 'Invalid order ID' });
     }
     if (!status) {
         return res.status(400).json({ message: 'Status is required' });
     }
-    if (!['pending', 'ready', 'delivered'].includes(status)) {
+    if (!statuses.includes(status)) {
         return res.status(400).json({ message: 'Invalid status value' });
+    }
+    const validatedStatus = status as typeof statuses[number];
+
+    if (role === 'accueil' && validatedStatus === 'ready') {
+        return res.status(403).json({ message: 'You are not allowed to change the status to this value' });
+    }
+    if (role === 'préparateur' && validatedStatus !== 'ready') {
+        return res.status(403).json({ message: 'You are not allowed to change the status to this value' });
     }
 
     try {

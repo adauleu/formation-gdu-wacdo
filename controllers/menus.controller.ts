@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import { Product } from '../models/Product.ts';
 import type { AuthRequest } from '../middleware/auth.ts';
 
-export async function getMenus(req: Request, res: Response) {
+export async function getMenus(req: AuthRequest, res: Response) {
     try {
         const menus = await Menu.find({}, 'name price').sort({ createdAt: -1 });
         res.status(200).json(menus);
@@ -31,7 +31,7 @@ export async function getMenuById(req: AuthRequest, res: Response) {
 }
 
 
-export async function createMenu(req: Request, res: Response) {
+export async function createMenu(req: AuthRequest, res: Response) {
     try {
         const { name, products, price } = req.body;
         if (!name) {
@@ -56,5 +56,22 @@ export async function createMenu(req: Request, res: Response) {
         res.status(201).json(savedMenu);
     } catch (error) {
         res.status(500).json({ message: 'Error creating menu', error });
+    }
+}
+
+export async function deleteMenu(req: AuthRequest, res: Response) {
+    const { id } = req.params;
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: 'Invalid menu ID' });
+    }
+
+    try {
+        const deletedMenu = await Menu.findByIdAndDelete(id);
+        if (!deletedMenu) {
+            return res.status(404).json({ message: 'Menu not found' });
+        }
+        res.status(200).json({ message: 'Menu deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting menu', error });
     }
 }

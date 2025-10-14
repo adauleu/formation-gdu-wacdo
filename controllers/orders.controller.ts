@@ -1,27 +1,29 @@
-import type { Request, Response } from 'express';
-import { Menu } from '../models/Menu.ts';
+import type { Response } from 'express';
 import mongoose from 'mongoose';
 import { Order, statuses } from '../models/Order.ts';
 import type { AuthRequest } from '../middleware/auth.ts';
 import type { JWTUser } from '../types.ts';
 
-export async function getOrders(req: Request, res: Response) {
+export async function getOrdersToPrepare(req: AuthRequest, res: Response) {
     try {
-        const menus = await Menu.find({}, 'name price').sort({ createdAt: -1 });
+        const menus = await Order.find({ status: 'pending' }, 'products menus status author')
+            .populate('products menus')
+            .populate('author', 'username')
+            .sort({ createdAt: 1 });
         res.status(200).json(menus);
     } catch (error) {
         res.status(500).json({ message: 'Error retrieving orders', error });
     }
 }
 
-export async function getOrderById(req: Request, res: Response) {
+export async function getOrderById(req: AuthRequest, res: Response) {
     const { id } = req.params;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid order ID' });
     }
 
     try {
-        const product = await Order.findById(id).select('products menus statuses').populate('products menus');
+        const product = await Order.findById(id).select('products menus status author').populate('products menus').populate('author', 'username');
         if (!product) {
             return res.status(404).json({ message: 'Order not found' });
         }
@@ -31,7 +33,7 @@ export async function getOrderById(req: Request, res: Response) {
     }
 }
 
-export async function createOrder(req: Request, res: Response) {
+export async function createOrder(req: AuthRequest, res: Response) {
     try {
         const { menus, products, status } = req.body;
         const hasMenus = menus && Array.isArray(menus) && menus.length > 0;
@@ -79,6 +81,9 @@ export async function updateOrderStatus(req: AuthRequest, res: Response) {
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
+        if (role === 'accueil' && order.status === 'pending') {
+            return res.status(400).json({ message: 'Order must be ready before being delivered' });
+        }
         if (status) {
             order.status = status;
         }
@@ -87,5 +92,25 @@ export async function updateOrderStatus(req: AuthRequest, res: Response) {
     } catch (error) {
         console.error('Error updating order', error);
         res.status(500).json({ message: 'Error updating order', error });
+    }
+}
+
+export async function deleteOrder(req: AuthRequest, res: Response) {
+    const { id } = req.params;
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: 'Invalid order ID' });
+    }
+
+    try {
+        const order = await Order.findByIdAndDelete(id);
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+        if (order.author?.equals !== req.user?.id) {
+            return res.status(403).json({ message: 'You are not allowed to delete this order' });
+        }
+        res.status(200).json({ message: 'Order deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting order', error });
     }
 }

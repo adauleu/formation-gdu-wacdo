@@ -6,6 +6,7 @@ const orderSchema = new mongoose.Schema({
     products: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
     menus: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Menu' }],
     status: { type: String, enum: statuses, default: 'pending' },
+    author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true });
 
 export const Order = mongoose.model('Order', orderSchema);

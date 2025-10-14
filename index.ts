@@ -8,6 +8,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
+import { setupSwagger } from './swagger.ts';
 
 dotenv.config();
 
@@ -29,6 +30,8 @@ app.use('/api/products', productsRoute);
 app.use('/api/orders', ordersRoute);
 app.use('/api/menus', menusRoute);
 app.use('/api/users', usersRoute);
+
+setupSwagger(app);
 
 // Start the server
 app.listen(process.env.PORT, () => {

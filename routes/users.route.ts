@@ -3,6 +3,7 @@ import { getUsers, loginUser, registerUser } from '../controllers/users.controll
 import { body } from 'express-validator';
 import { hasRole } from '../middleware/role.ts';
 import { authMiddleware } from '../middleware/auth.ts';
+
 const router: express.Router = express.Router();
 
 router.get('/', authMiddleware, hasRole('admin'), getUsers);

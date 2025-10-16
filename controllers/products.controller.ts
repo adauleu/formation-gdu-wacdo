@@ -1,4 +1,4 @@
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import { Product } from '../models/Product.ts';
 import mongoose from 'mongoose';
 import type { AuthRequest } from '../middleware/auth.ts';

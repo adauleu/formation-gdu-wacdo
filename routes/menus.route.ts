@@ -5,14 +5,6 @@ import { hasRole } from '../middleware/role.ts';
 
 const router: express.Router = express.Router();
 
-/**
- * @swagger
- * tags:
- *   name: Menus
- *   description: Gestion des menus par un utilisateur avec le rôle "admin"
- */
-
-
 router.use(authMiddleware)
 router.use(hasRole('admin'))
 

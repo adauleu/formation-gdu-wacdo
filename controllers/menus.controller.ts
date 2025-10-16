@@ -43,8 +43,6 @@ export async function createMenu(req: AuthRequest, res: Response) {
         if (!price) {
             return res.status(400).json({ message: 'Price is required' });
         }
-        const image = req.file ? req.file.path : undefined;
-
 
         const newProduct = new Menu({
             name,
@@ -54,8 +52,8 @@ export async function createMenu(req: AuthRequest, res: Response) {
 
         const savedMenu = await newProduct.save();
         res.status(201).json(savedMenu);
-    } catch (error) {
-        res.status(500).json({ message: 'Error creating menu', error });
+    } catch (error: any) {
+        res.status(500).json({ message: 'Error creating menu', error: error.message });
     }
 }
 

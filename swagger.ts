@@ -1,7 +1,7 @@
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 
-const options = {
+const options: swaggerJSDoc.Options = {
     definition: {
         openapi: '3.0.0',
         info: {
@@ -24,9 +24,28 @@ const options = {
                 },
             },
         },
+        tags: [
+            {
+                name: 'Users',
+                description: 'Gestion des utilisateurs (accessible à tous, sauf la route GET /users qui est réservée aux admins)'
+            },
+            {
+                name: 'Menus',
+                description: 'Gestion des menus composés (accessible uniquement aux admins)'
+            },
+            {
+                name: 'Products',
+                description: 'Gestion du catalogue de produits (accessible uniquement aux admins)'
+            },
+            {
+                name: 'Orders',
+                description: 'Gestion des commandes (accessible aux préparateurs et aux équipiers d\'accueil)'
+            }
+        ],
         security: [{
             bearerAuth: []
-        }]
+        }],
+
     },
     apis: ['./routes/*.route.ts'], // Chemin vers les fichiers contenant les annotations Swagger
 };

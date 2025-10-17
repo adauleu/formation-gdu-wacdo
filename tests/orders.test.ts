@@ -3,6 +3,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import { Order } from '../models/Order.ts';
 import { jest } from '@jest/globals';
+import { Product } from '../models/Product.ts';
 
 let mongoServer: MongoMemoryServer;
 let app: any;
@@ -183,10 +184,11 @@ describe('POST /orders (createOrder)', () => {
         currentUserId = new mongoose.Types.ObjectId();
     });
     it('crée une commande lorsque des produits sont fournis', async () => {
+        const product = await Product.create({ name: 'Test Product', description: 'desc', price: 1.5, isAvailable: true });
         const res = await request(app)
             .post('/api/orders')
             .set('Authorization', 'Bearer testtoken')
-            .send({ products: ['foo'], menus: [], status: 'pending' });
+            .send({ products: [product.id], menus: [], status: 'pending' });
         expect(res.status).toBe(201);
         expect(res.body.products).toBeDefined();
     });
@@ -199,7 +201,7 @@ describe('POST /orders (createOrder)', () => {
     });
 });
 
-describe.only('DELETE /orders/:id (deleteOrder)', () => {
+describe('DELETE /orders/:id (deleteOrder)', () => {
     beforeEach(() => {
         currentRole = 'accueil';
         currentUserId = new mongoose.Types.ObjectId();

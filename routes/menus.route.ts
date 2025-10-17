@@ -150,5 +150,5 @@ router.use(hasRole('admin'))
 router.get('/', getMenus);
 router.get('/:id', getMenuById);
 router.post('/', createMenu);
-router.delete('/id', deleteMenu);
+router.delete('/:id', deleteMenu);
 export default router;

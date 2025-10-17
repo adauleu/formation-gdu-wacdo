@@ -1,4 +1,5 @@
 import app from './index.ts';
+
 const PORT = process.env.PORT || 3000
 
 // Start the server

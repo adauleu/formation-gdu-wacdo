@@ -20,11 +20,11 @@ export async function getMenuById(req: AuthRequest, res: Response) {
     }
 
     try {
-        const product = await Product.findById(id).select('name products price').populate('products', 'name price');
-        if (!product) {
+        const menu = await Menu.findById(id).select('name products price').populate('products', 'name price');
+        if (!menu) {
             return res.status(404).json({ message: 'Menu not found' });
         }
-        res.status(200).json(product);
+        res.status(200).json(menu);
     } catch (error) {
         res.status(500).json({ message: 'Error retrieving menu', error });
     }

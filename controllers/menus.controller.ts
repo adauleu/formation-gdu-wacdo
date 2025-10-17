@@ -1,12 +1,11 @@
 import type { Request, Response } from 'express';
 import { Menu } from '../models/Menu.ts';
 import mongoose from 'mongoose';
-import { Product } from '../models/Product.ts';
 import type { AuthRequest } from '../middleware/auth.ts';
 
 export async function getMenus(req: AuthRequest, res: Response) {
     try {
-        const menus = await Menu.find({}, 'name price').sort({ createdAt: -1 });
+        const menus = await Menu.find({}, 'name price').populate('products', 'name').sort({ createdAt: -1 });
         res.status(200).json(menus);
     } catch (error) {
         res.status(500).json({ message: 'Error retrieving menus', error });
@@ -20,7 +19,7 @@ export async function getMenuById(req: AuthRequest, res: Response) {
     }
 
     try {
-        const menu = await Menu.findById(id).select('name products price').populate('products', 'name price');
+        const menu = await Menu.findById(id).select('name products price').populate('products', 'name');
         if (!menu) {
             return res.status(404).json({ message: 'Menu not found' });
         }

@@ -1,9 +1,10 @@
 import request from 'supertest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
-import { Order } from '../models/Order.ts';
+import { Order } from '../../models/Order.ts';
 import { jest } from '@jest/globals';
-import { Product } from '../models/Product.ts';
+import { Product } from '../../models/Product.ts';
+import { Menu } from '../../models/Menu.ts';
 
 let mongoServer: MongoMemoryServer;
 let app: any;
@@ -12,7 +13,7 @@ let app: any;
 let currentRole = 'préparateur';
 let currentUserId = new mongoose.Types.ObjectId();
 
-jest.unstable_mockModule('../middleware/auth.ts', () => ({
+jest.unstable_mockModule('../../middleware/auth.ts', () => ({
     authMiddleware: (req: any, res: any, next: any) => {
         req.user = { id: currentUserId, _id: currentUserId, role: currentRole };
         next();
@@ -20,7 +21,7 @@ jest.unstable_mockModule('../middleware/auth.ts', () => ({
 }));
 
 beforeAll(async () => {
-    const mod = await import('../index.ts');
+    const mod = await import('../../index.ts');
     app = mod.default;
 
     if (mongoose.connection.readyState !== 0) {
@@ -162,12 +163,18 @@ describe('GET /orders/:id (getOrderById)', () => {
         currentUserId = new mongoose.Types.ObjectId();
     });
     it('retourne une commande existante', async () => {
-        const order = await Order.create({ products: [], menus: [], status: 'pending', author: currentUserId });
+        // Créer un produit et un menu avec des prix, puis une commande qui les référence
+        const product = await Product.create({ name: 'P1', description: 'desc', price: 1.5, isAvailable: true });
+        const menu = await Menu.create({ name: 'M1', products: [product._id], price: 2.5 });
+
+        const order = await Order.create({ products: [product._id], menus: [menu._id], status: 'pending', author: currentUserId });
+
         const res = await request(app)
             .get(`/api/orders/${order._id}`)
             .set('Authorization', 'Bearer testtoken');
         expect(res.status).toBe(200);
         expect(res.body._id).toBe(order._id.toString());
+        expect(res.body.totalPrice).toBe(1.5 + 2.5);
     });
     it('retourne 404 si la commande est absente', async () => {
         const fakeId = new mongoose.Types.ObjectId();

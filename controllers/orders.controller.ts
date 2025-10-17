@@ -6,11 +6,9 @@ import type { JWTUser } from '../types.ts';
 
 export async function getOrdersToPrepare(req: AuthRequest, res: Response) {
     try {
-        const menus = await Order.find({ status: 'pending' }, 'products menus status author')
-            .populate('products menus')
-            .populate('author', 'username')
+        const orders = await Order.find({ status: 'pending' }, 'products menus status author')
             .sort({ createdAt: 1 });
-        res.status(200).json(menus);
+        res.status(200).json(orders);
     } catch (error) {
         res.status(500).json({ message: 'Error retrieving orders', error });
     }
@@ -23,11 +21,11 @@ export async function getOrderById(req: AuthRequest, res: Response) {
     }
 
     try {
-        const product = await Order.findById(id).select('products menus status author').populate('products menus').populate('author', 'username');
-        if (!product) {
+        const order = await Order.findById(id).select('products menus status author');
+        if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
-        res.status(200).json(product);
+        res.status(200).json(order);
     } catch (error) {
         res.status(500).json({ message: 'Error retrieving order', error });
     }

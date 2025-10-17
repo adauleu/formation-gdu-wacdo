@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
-import { User } from '../models/User.ts';
+import { User } from '../../models/User.ts';
 import { jest } from '@jest/globals';
 import bcrypt from 'bcryptjs';
 
@@ -12,7 +12,7 @@ let app: any;
 let currentRole = 'admin';
 let currentUserId = new mongoose.Types.ObjectId();
 
-jest.unstable_mockModule('../middleware/auth.ts', () => ({
+jest.unstable_mockModule('../../middleware/auth.ts', () => ({
     authMiddleware: (req: any, res: any, next: any) => {
         req.user = { id: currentUserId, _id: currentUserId, role: currentRole };
         next();
@@ -20,7 +20,7 @@ jest.unstable_mockModule('../middleware/auth.ts', () => ({
 }));
 
 beforeAll(async () => {
-    const mod = await import('../index.ts');
+    const mod = await import('../../index.ts');
     app = mod.default;
 
     if (mongoose.connection.readyState !== 0) {

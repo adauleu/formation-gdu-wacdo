@@ -1,5 +1,15 @@
 import mongoose from "mongoose";
 
+export interface IProduct {
+    name: string;
+    description?: string;
+    price: number;
+    image?: string;
+    isAvailable?: boolean;
+    createdAt?: Date;
+    updatedAt?: Date;
+}
+
 const productSchema = new mongoose.Schema({
     name: { type: String, required: true },
     description: { type: String },
@@ -8,4 +18,5 @@ const productSchema = new mongoose.Schema({
     isAvailable: { type: Boolean, default: true },
 }, { timestamps: true });
 
-export const Product = mongoose.model('Product', productSchema);
+
+export const Product = mongoose.model<IProduct>('Product', productSchema);

@@ -1,12 +1,15 @@
 import type { Response } from 'express';
 import mongoose from 'mongoose';
-import { Order, statuses } from '../models/Order.ts';
+import { type IOrder, Order, statuses, type IOrderItem } from '../models/Order.ts';
 import type { AuthRequest } from '../middleware/auth.ts';
 import type { JWTUser } from '../types.ts';
+import { Menu } from '../models/Menu.ts';
+import { Product } from '../models/Product.ts';
+import { calculateTotalPrice } from '../utils/price.ts';
 
 export async function getOrdersToPrepare(req: AuthRequest, res: Response) {
     try {
-        const orders = await Order.find({ status: 'pending' }, 'products menus status author')
+        const orders = await Order.find({ status: 'pending' }, 'items status createdBy, totalPrice')
             .sort({ createdAt: 1 });
         res.status(200).json(orders);
     } catch (error) {
@@ -21,7 +24,7 @@ export async function getOrderById(req: AuthRequest, res: Response) {
     }
 
     try {
-        const order = await Order.findById(id).select('products menus status author');
+        const order = await Order.findById(id).select('items status createdBy totalPrice');
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
@@ -33,23 +36,59 @@ export async function getOrderById(req: AuthRequest, res: Response) {
 
 export async function createOrder(req: AuthRequest, res: Response) {
     try {
-        const { menus, products, status } = req.body;
-        const hasMenus = menus && Array.isArray(menus) && menus.length > 0;
-        const hasProducts = products && Array.isArray(products) && products.length > 0;
-        if (!hasMenus && !hasProducts) {
+        const { items, status } = req.body;
+        const hasItems = items && Array.isArray(items) && items.length > 0;
+        if (!hasItems) {
             return res.status(400).json({ message: 'Order is empty' });
         }
-        const newOrder = new Order({
-            menus,
-            products,
+
+        const menuIds = items.filter(i => i.menuId).map(i => i.menuId);
+        const productIds = items.filter(i => i.productId).map(i => i.productId);
+
+        const [menus, products] = await Promise.all([
+            Menu.find({ _id: { $in: menuIds } }),
+            Product.find({ _id: { $in: productIds } })
+        ]);
+
+        const orderItems: IOrderItem[] = items.map(item => {
+            if (item.menuId) {
+                const menu = menus.find(m => m._id.equals(item.menuId));
+                if (!menu) throw new Error(`Unable to find menu : ${item.menuId}`);
+                return {
+                    type: "menu",
+                    refId: menu._id,
+                    name: menu.name,
+                    price: menu.price,
+                    quantity: item.quantity
+                };
+            }
+
+            if (item.productId) {
+                const product = products.find(p => p._id.equals(item.productId));
+                if (!product) throw new Error(`Unable to find product : ${item.productId}`);
+                return {
+                    type: "product",
+                    refId: product._id,
+                    name: product.name,
+                    price: product.price,
+                    quantity: item.quantity
+                };
+            }
+
+            throw new Error("Each item must include a productId or a menuId.");
+        });
+        const newOrder = new Order<IOrder>({
+            items,
             status,
+            totalPrice: calculateTotalPrice(orderItems),
+            createdBy: req.user?.id as JWTUser['id'],
         });
 
         const savedOrder = await newOrder.save();
         res.status(201).json(savedOrder);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error creating order', error);
-        res.status(500).json({ message: 'Error creating order', error });
+        res.status(500).json({ message: 'Error creating order', error: error.message });
     }
 }
 
@@ -105,7 +144,7 @@ export async function deleteOrder(req: AuthRequest, res: Response) {
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
-        if (!order.author?.equals(req.user?.id)) {
+        if (!order.createdBy.equals(req.user?.id)) {
             return res.status(403).json({ message: 'You are not allowed to delete this order' });
         }
         res.status(200).json({ message: 'Order deleted successfully' });

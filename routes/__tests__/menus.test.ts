@@ -82,7 +82,7 @@ describe('POST /menus (createMenu)', () => {
             .post('/api/menus')
             .set('Authorization', 'Bearer testtoken')
             .send({ name: 'MenuPost', products: [prod._id.toString()], price: 12.5 });
-        expect([201, 200].includes(res.status)).toBe(true);
+        expect(res.status).toBe(201);
         // Vérifier que le menu retourné contient un nom
         expect(res.body.name || res.body).toBeDefined();
     });
@@ -92,7 +92,7 @@ describe('POST /menus (createMenu)', () => {
             .post('/api/menus')
             .set('Authorization', 'Bearer testtoken')
             .send({ name: '', products: [] });
-        expect([400, 422].includes(res.status)).toBe(true);
+        expect(res.status).toBe(400);
     });
 });
 
@@ -113,6 +113,6 @@ describe('DELETE /menus/:id (deleteMenu)', () => {
         const res = await request(app)
             .delete(`/api/menus/${fakeId}`)
             .set('Authorization', 'Bearer testtoken');
-        expect([404, 400].includes(res.status)).toBe(true);
+        expect(res.status).toBe(404);
     });
 });

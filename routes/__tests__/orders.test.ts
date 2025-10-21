@@ -44,7 +44,7 @@ beforeEach(async () => {
 });
 
 // PATCH /orders/:id (préparateur)
-describe('PATCH /orders/:id (préparateur)', () => {
+describe('PATCH /orders/:id/status (préparateur)', () => {
     beforeEach(() => {
         currentRole = 'préparateur';
         currentUserId = new mongoose.Types.ObjectId();
@@ -53,14 +53,14 @@ describe('PATCH /orders/:id (préparateur)', () => {
     it('permet au préparateur de passer une commande à "ready"', async () => {
         // Création d'une commande de test
         const order = await Order.create({
-            products: [],
-            menus: [],
+            items: [],
             status: 'pending',
-            author: new mongoose.Types.ObjectId()
+            createdBy: new mongoose.Types.ObjectId(),
+            totalPrice: 0
         });
 
         const res = await request(app)
-            .patch(`/api/orders/${order._id}`)
+            .patch(`/api/orders/${order._id}/status`)
             .set('Authorization', 'Bearer testtoken')
             .send({ status: 'ready' });
 
@@ -70,14 +70,14 @@ describe('PATCH /orders/:id (préparateur)', () => {
 
     it('refuse au préparateur de passer à un autre statut que "ready"', async () => {
         const order = await Order.create({
-            products: [],
-            menus: [],
+            items: [],
             status: 'pending',
-            author: new mongoose.Types.ObjectId()
+            createdBy: new mongoose.Types.ObjectId(),
+            totalPrice: 0
         });
 
         const res = await request(app)
-            .patch(`/api/orders/${order._id}`)
+            .patch(`/api/orders/${order._id}/status`)
             .set('Authorization', 'Bearer testtoken')
             .send({ status: 'delivered' });
 
@@ -86,7 +86,7 @@ describe('PATCH /orders/:id (préparateur)', () => {
 });
 
 // PATCH /orders/:id (accueil)
-describe('PATCH /orders/:id (accueil)', () => {
+describe('PATCH /orders/:id/status (accueil)', () => {
     beforeEach(() => {
         currentRole = 'accueil';
         currentUserId = new mongoose.Types.ObjectId();
@@ -94,14 +94,14 @@ describe('PATCH /orders/:id (accueil)', () => {
 
     it('permet à l\'équipier d\'accueil de passer une commande à "delivered" si elle est "ready"', async () => {
         const order = await Order.create({
-            products: [],
-            menus: [],
+            items: [],
             status: 'ready',
-            author: new mongoose.Types.ObjectId()
+            createdBy: new mongoose.Types.ObjectId(),
+            totalPrice: 0
         });
 
         const res = await request(app)
-            .patch(`/api/orders/${order._id}`)
+            .patch(`/api/orders/${order._id}/status`)
             .set('Authorization', 'Bearer testtoken')
             .send({ status: 'delivered' });
 
@@ -111,14 +111,15 @@ describe('PATCH /orders/:id (accueil)', () => {
 
     it('refuse à l\'équipier d\'accueil de passer une commande à "delivered" si elle est "pending"', async () => {
         const order = await Order.create({
-            products: [],
-            menus: [],
+            items: [],
             status: 'pending',
-            author: new mongoose.Types.ObjectId()
+            createdBy: new mongoose.Types.ObjectId(),
+            totalPrice: 0
         });
+        console.log('Created order with status:', order.status);
 
         const res = await request(app)
-            .patch(`/api/orders/${order._id}`)
+            .patch(`/api/orders/${order._id}/status`)
             .set('Authorization', 'Bearer testtoken')
             .send({ status: 'delivered' });
 
@@ -127,14 +128,14 @@ describe('PATCH /orders/:id (accueil)', () => {
 
     it('refuse à l\'équipier d\'accueil de passer une commande à "ready"', async () => {
         const order = await Order.create({
-            products: [],
-            menus: [],
+            items: [],
             status: 'pending',
-            author: new mongoose.Types.ObjectId()
+            createdBy: new mongoose.Types.ObjectId(),
+            totalPrice: 0
         });
 
         const res = await request(app)
-            .patch(`/api/orders/${order._id}`)
+            .patch(`/api/orders/${order._id}/status`)
             .set('Authorization', 'Bearer testtoken')
             .send({ status: 'ready' });
 
@@ -148,7 +149,7 @@ describe('GET /orders (getOrdersToPrepare)', () => {
         currentUserId = new mongoose.Types.ObjectId();
     });
     it('retourne la liste des commandes à préparer', async () => {
-        await Order.create({ products: [], menus: [], status: 'pending', author: currentUserId });
+        await Order.create({ items: [], status: 'pending', createdBy: currentUserId, totalPrice: 0 });
         const res = await request(app)
             .get('/api/orders')
             .set('Authorization', 'Bearer testtoken');
@@ -167,14 +168,14 @@ describe('GET /orders/:id (getOrderById)', () => {
         const product = await Product.create({ name: 'P1', description: 'desc', price: 1.5, isAvailable: true });
         const menu = await Menu.create({ name: 'M1', products: [product._id], price: 2.5 });
 
-        const order = await Order.create({ products: [product._id], menus: [menu._id], status: 'pending', author: currentUserId });
+        const order = await Order.create({ items: [{ productId: product._id, quantity: 1 }], status: 'pending', createdBy: currentUserId, totalPrice: 9 });
 
         const res = await request(app)
             .get(`/api/orders/${order._id}`)
             .set('Authorization', 'Bearer testtoken');
         expect(res.status).toBe(200);
         expect(res.body._id).toBe(order._id.toString());
-        expect(res.body.totalPrice).toBe(1.5 + 2.5);
+        expect(res.body.totalPrice).toBe(9);
     });
     it('retourne 404 si la commande est absente', async () => {
         const fakeId = new mongoose.Types.ObjectId();
@@ -195,15 +196,15 @@ describe('POST /orders (createOrder)', () => {
         const res = await request(app)
             .post('/api/orders')
             .set('Authorization', 'Bearer testtoken')
-            .send({ products: [product.id], menus: [], status: 'pending' });
+            .send({ items: [{ productId: product.id, quantity: 1 }], status: 'pending', createdBy: currentUserId, totalPrice: 1.5 });
         expect(res.status).toBe(201);
-        expect(res.body.products).toBeDefined();
+        expect(res.body.items).toBeDefined();
     });
     it('retourne 400 si la commande est vide', async () => {
         const res = await request(app)
             .post('/api/orders')
             .set('Authorization', 'Bearer testtoken')
-            .send({ products: [], menus: [] });
+            .send({ items: [], });
         expect(res.status).toBe(400);
     });
 });
@@ -214,14 +215,14 @@ describe('DELETE /orders/:id (deleteOrder)', () => {
         currentUserId = new mongoose.Types.ObjectId();
     });
     it('supprime la commande si l’utilisateur connecté en est l’auteur', async () => {
-        const order = await Order.create({ products: [], menus: [], status: 'pending', author: currentUserId });
+        const order = await Order.create({ items: [], status: 'pending', createdBy: currentUserId, totalPrice: 0 });
         const res = await request(app)
             .delete(`/api/orders/${order._id}`)
             .set('Authorization', 'Bearer testtoken');
         expect(res.status).toBe(200);
     });
     it('refuse la suppression si l’utilisateur connecté n’est pas l’auteur de la commande', async () => {
-        const order = await Order.create({ products: [], menus: [], status: 'pending', author: new mongoose.Types.ObjectId() });
+        const order = await Order.create({ items: [], status: 'pending', createdBy: new mongoose.Types.ObjectId(), totalPrice: 0 });
         const res = await request(app)
             .delete(`/api/orders/${order._id}`)
             .set('Authorization', 'Bearer testtoken');

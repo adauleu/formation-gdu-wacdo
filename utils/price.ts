@@ -1,8 +1,5 @@
-import type { IMenu } from "../models/Menu.ts";
-import type { IProduct } from "../models/Product.ts";
+import type { IOrderItem } from "../models/Order.ts";
 
-export function calculateTotalPrice(products: Array<IProduct>, menus: Array<IMenu>): number {
-    const productsTotal = products.reduce((sum, p) => sum + p.price, 0);
-    const menusTotal = menus.reduce((sum, m) => sum + m.price, 0);
-    return productsTotal + menusTotal;
+export function calculateTotalPrice(items: Array<IOrderItem>): number {
+    return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 }

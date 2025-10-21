@@ -25,7 +25,7 @@ router.use(authMiddleware)
  *               items:
  *                 type: object
  *                 properties:
- *                   products:
+ *                   items:
  *                     type: array
  *                     items:
  *                       type: object
@@ -36,7 +36,7 @@ router.use(authMiddleware)
  *                   status:
  *                     type: string
  *                     enum: [pending]
- *                   author:
+ *                   createdBy:
  *                     type: object
  *                     properties:
  *                       username:
@@ -57,16 +57,18 @@ router.use(authMiddleware)
  *           schema:
  *             type: object
  *             properties:
- *               menus:
+ *               items:
  *                 type: array
  *                 items:
- *                   type: string
- *                   description: ID des menus
- *               products:
- *                 type: array
- *                 items:
- *                   type: string
- *                   description: ID des produits
+ *                   type: object
+ *                   description: ID des menus ou des produits avec quantité
+ *                   properties:
+ *                     productId:
+ *                       type: string
+ *                     menuId:
+ *                       type: string
+ *                     quantity:
+ *                       type: integer
  *               status:
  *                 type: string
  *                 enum: [pending, ready, delivered]

@@ -222,6 +222,6 @@ router.use(authMiddleware)
 router.get('/', hasRole('préparateur'), getOrdersToPrepare);
 router.get('/:id', hasRole('préparateur'), getOrderById);
 router.post('/', hasRole('accueil'), createOrder);
-router.patch('/:id', hasOneOfRole(['accueil', 'préparateur']), updateOrderStatus);
+router.patch('/:id/status', hasOneOfRole(['accueil', 'préparateur']), updateOrderStatus);
 router.delete('/:id', hasRole('accueil'), deleteOrder);
 export default router;

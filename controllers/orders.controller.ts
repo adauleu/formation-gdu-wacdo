@@ -50,33 +50,43 @@ export async function createOrder(req: AuthRequest, res: Response) {
             Product.find({ _id: { $in: productIds } })
         ]);
 
-        const orderItems: IOrderItem[] = items.map(item => {
+        const orderItems: IOrderItem[] = [];
+
+        for (const item of items) {
             if (item.menuId) {
                 const menu = menus.find(m => m._id.equals(item.menuId));
-                if (!menu) throw new Error(`Unable to find menu : ${item.menuId}`);
-                return {
+                if (!menu) {
+                    return res.status(400).json({ message: `Unable to find menu: ${item.menuId}` });
+                }
+                orderItems.push({
                     type: "menu",
                     refId: menu._id,
-                    name: menu.name,
                     price: menu.price,
                     quantity: item.quantity
-                };
+                });
+                continue;
             }
 
             if (item.productId) {
                 const product = products.find(p => p._id.equals(item.productId));
-                if (!product) throw new Error(`Unable to find product : ${item.productId}`);
-                return {
+                if (!product) {
+                    return res.status(400).json({ message: `Unable to find product: ${item.productId}` });
+                }
+                if (!product.isAvailable) {
+                    return res.status(400).json({ message: `Product not available: ${product.name}` });
+                }
+                orderItems.push({
                     type: "product",
                     refId: product._id,
-                    name: product.name,
                     price: product.price,
                     quantity: item.quantity
-                };
+                });
+                continue;
             }
 
-            throw new Error("Each item must include a productId or a menuId.");
-        });
+            return res.status(400).json({ message: "Each item must include a productId or a menuId." });
+        }
+
         const newOrder = new Order<IOrder>({
             items,
             status,

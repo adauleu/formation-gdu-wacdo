@@ -56,6 +56,28 @@ export async function createMenu(req: AuthRequest, res: Response) {
     }
 }
 
+export function updateMenu(req: AuthRequest, res: Response) {
+    const { id } = req.params;
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: 'Invalid menu ID' });
+    }
+
+    const { name, products, price } = req.body;
+
+    Menu.findByIdAndUpdate(
+        id,
+        { name, products, price },
+        { new: true }
+    ).then(updatedMenu => {
+        if (!updatedMenu) {
+            return res.status(404).json({ message: 'Menu not found' });
+        }
+        res.status(200).json(updatedMenu);
+    }).catch(error => {
+        res.status(500).json({ message: 'Error updating menu', error });
+    });
+}
+
 export async function deleteMenu(req: AuthRequest, res: Response) {
     const { id } = req.params;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {

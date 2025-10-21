@@ -116,7 +116,6 @@ describe('PATCH /orders/:id/status (accueil)', () => {
             createdBy: new mongoose.Types.ObjectId(),
             totalPrice: 0
         });
-        console.log('Created order with status:', order.status);
 
         const res = await request(app)
             .patch(`/api/orders/${order._id}/status`)
@@ -200,12 +199,30 @@ describe('POST /orders (createOrder)', () => {
         expect(res.status).toBe(201);
         expect(res.body.items).toBeDefined();
     });
+
+    it('retourne 400 lorsque un produit n\'est pas disponible', async () => {
+        const product = await Product.create({ name: 'Test Product', description: 'desc', price: 1.5, isAvailable: false });
+        const res = await request(app)
+            .post('/api/orders')
+            .set('Authorization', 'Bearer testtoken')
+            .send({ items: [{ productId: product.id, quantity: 1 }], status: 'pending', createdBy: currentUserId, totalPrice: 1.5 });
+        expect(res.status).toBe(400);
+    });
+
     it('retourne 400 si la commande est vide', async () => {
         const res = await request(app)
             .post('/api/orders')
             .set('Authorization', 'Bearer testtoken')
             .send({ items: [], });
         expect(res.status).toBe(400);
+    });
+
+    it('retourne 500 si la commande contient un id d\'un produit qui n\'existe pas', async () => {
+        const res = await request(app)
+            .post('/api/orders')
+            .set('Authorization', 'Bearer testtoken')
+            .send({ items: [{ productId: 'JexistePas', quantity: 1 }], });
+        expect(res.status).toBe(500);
     });
 });
 

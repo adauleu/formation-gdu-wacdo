@@ -1,5 +1,5 @@
 import express from 'express';
-import { createMenu, deleteMenu, getMenuById, getMenus } from '../controllers/menus.controller.ts';
+import { createMenu, deleteMenu, getMenuById, getMenus, updateMenu } from '../controllers/menus.controller.ts';
 import { authMiddleware } from '../middleware/auth.ts';
 import { hasRole } from '../middleware/role.ts';
 
@@ -7,7 +7,6 @@ const router: express.Router = express.Router();
 
 router.use(authMiddleware)
 router.use(hasRole('admin'))
-
 
 /**
  * @swagger
@@ -83,6 +82,7 @@ router.use(hasRole('admin'))
  *         description: Non autorisé
  *       403:
  *         description: Accès refusé
+ *
  * /menus/{id}:
  *   get:
  *     summary: Récupère un menu par son identifiant
@@ -121,19 +121,77 @@ router.use(hasRole('admin'))
  *         description: Accès refusé
  *       404:
  *         description: Menu non trouvé
- *   delete:
- *     summary: Supprime un menu
+ *
+ *   put:
+ *     summary: Met à jour un menu
  *     tags: [Menus]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Identifiant du menu à mettre à jour
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - name
+ *               - products
+ *               - price
  *             properties:
- *               id:
+ *               name:
  *                 type: string
- *                 description: Identifiant du menu à supprimer
+ *               products:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   description: ID des produits
+ *               price:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Menu mis à jour avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 name:
+ *                   type: string
+ *                 products:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *                       price:
+ *                         type: number
+ *                 price:
+ *                   type: number
+ *       400:
+ *         description: Requête invalide
+ *       401:
+ *         description: Non autorisé
+ *       403:
+ *         description: Accès refusé
+ *       404:
+ *         description: Menu non trouvé
+ *
+ *   delete:
+ *     summary: Supprime un menu
+ *     tags: [Menus]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Identifiant du menu à supprimer
  *     responses:
  *       200:
  *         description: Menu supprimé avec succès
@@ -147,8 +205,10 @@ router.use(hasRole('admin'))
  *         description: Menu non trouvé
  */
 
+
 router.get('/', getMenus);
 router.get('/:id', getMenuById);
 router.post('/', createMenu);
+router.put('/:id', updateMenu);
 router.delete('/:id', deleteMenu);
 export default router;

@@ -5,4 +5,5 @@ import { createDefaultEsmPreset } from 'ts-jest';
 export default {
   ...createDefaultEsmPreset(),
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
+  extensionsToTreatAsEsm: ['.ts'],
 };

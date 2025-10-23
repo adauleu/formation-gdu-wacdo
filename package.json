@@ -1,20 +1,11 @@
 {
   "name": "formation-gdu-wacdo",
-  "version": "1.0.0",
-  "description": "",
-  "main": "dist/index.js",
-  "type": "module",
+  "description": "Backend de l'application Wacdo",
   "scripts": {
-    "start": "ts-node server.ts",
-    "dev": "nodemon server.ts",
-    "build": "tsc",
-    "test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 jest",
-    "test:coverage": "pnpm test --coverage"
+    "start": "tsx src/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.15.1",
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
@@ -47,6 +38,8 @@
     "supertest": "^7.1.4",
     "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.1"
   }
 }

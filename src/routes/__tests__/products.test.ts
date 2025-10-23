@@ -3,9 +3,9 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import { Product } from '../../models/Product';
 import { vi } from 'vitest';
+import app from '../../index';
 
 let mongoServer: MongoMemoryServer;
-let app: any;
 
 // --- Gestion dynamique du rôle pour les tests ---
 const currentRole = 'admin';
@@ -19,9 +19,6 @@ vi.mock('../../middleware/auth', () => ({
 }));
 
 beforeAll(async () => {
-    const mod = await import('../../index.js');
-    app = mod.default;
-
     if (mongoose.connection.readyState !== 0) {
         await mongoose.disconnect();
     }

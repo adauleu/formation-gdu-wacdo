@@ -2,16 +2,17 @@ import request from 'supertest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import { Menu } from '../../models/Menu';
-import { jest } from '@jest/globals';
+import { vi } from 'vitest';
+import { Product } from '../../models/Product';
+import app from '../../index';
 
 let mongoServer: MongoMemoryServer;
-let app: any;
 
 // --- Gestion dynamique du rôle pour les tests ---
 const currentRole = 'admin';
 const currentUserId = new mongoose.Types.ObjectId();
 
-jest.unstable_mockModule('../../middleware/auth', () => ({
+vi.mock('../../middleware/auth', () => ({
     authMiddleware: (req: any, res: any, next: any) => {
         req.user = { id: currentUserId, _id: currentUserId, role: currentRole };
         next();
@@ -19,9 +20,6 @@ jest.unstable_mockModule('../../middleware/auth', () => ({
 }));
 
 beforeAll(async () => {
-    const mod = await import('../../index');
-    app = mod.app;
-
     if (mongoose.connection.readyState !== 0) {
         await mongoose.disconnect();
     }
@@ -34,7 +32,6 @@ beforeAll(async () => {
 afterAll(async () => {
     await mongoose.disconnect();
     await mongoServer.stop();
-    jest.clearAllMocks();
 });
 
 beforeEach(async () => {
@@ -55,7 +52,7 @@ describe('GET /menus (getMenus)', () => {
 describe('GET /menus/:id (getMenuById)', () => {
     it('retourne un menu existant', async () => {
         // créer d'abord un produit pour référencer dans le menu
-        const prod = new (await import('../../models/Product')).Product({ name: 'P1', description: 'x', price: 1, isAvailable: true });
+        const prod = new Product({ name: 'P1', description: 'x', price: 1, isAvailable: true });
         await prod.save();
         const menu = await Menu.create({ name: 'MenuTest', products: [prod._id], price: 9.9 });
         const res = await request(app)
@@ -76,7 +73,7 @@ describe('GET /menus/:id (getMenuById)', () => {
 
 describe('POST /menus (createMenu)', () => {
     it('crée un menu lorsque les données sont valides', async () => {
-        const prod = new (await import('../../models/Product')).Product({ name: 'P2', description: 'x', price: 2, isAvailable: true });
+        const prod = new Product({ name: 'P2', description: 'x', price: 2, isAvailable: true });
         await prod.save();
         const res = await request(app)
             .post('/api/menus')
@@ -98,7 +95,7 @@ describe('POST /menus (createMenu)', () => {
 
 describe('DELETE /menus/:id (deleteMenu)', () => {
     it('supprime le menu si l’utilisateur a le rôle admin', async () => {
-        const prod = new (await import('../../models/Product')).Product({ name: 'P3', description: 'x', price: 3, isAvailable: true });
+        const prod = new Product({ name: 'P3', description: 'x', price: 3, isAvailable: true });
         await prod.save();
         const menu = await Menu.create({ name: 'MenuToDelete', products: [prod._id], price: 5 });
         const res = await request(app)

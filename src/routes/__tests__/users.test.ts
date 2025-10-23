@@ -2,17 +2,17 @@ import request from 'supertest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import { User } from '../../models/User';
-import { jest } from '@jest/globals';
 import bcrypt from 'bcryptjs';
+import { vi } from 'vitest';
+import app from '../../index';
 
 let mongoServer: MongoMemoryServer;
-let app: any;
 
 // --- Gestion dynamique du rôle pour les tests ---
 let currentRole = 'admin';
 let currentUserId = new mongoose.Types.ObjectId();
 
-jest.unstable_mockModule('../../middleware/auth', () => ({
+vi.mock('../../middleware/auth', () => ({
     authMiddleware: (req: any, res: any, next: any) => {
         req.user = { id: currentUserId, _id: currentUserId, role: currentRole };
         next();
@@ -20,9 +20,6 @@ jest.unstable_mockModule('../../middleware/auth', () => ({
 }));
 
 beforeAll(async () => {
-    const mod = await import('../../index');
-    app = mod.app;
-
     if (mongoose.connection.readyState !== 0) {
         await mongoose.disconnect();
     }
@@ -35,7 +32,6 @@ beforeAll(async () => {
 afterAll(async () => {
     await mongoose.disconnect();
     await mongoServer.stop();
-    jest.clearAllMocks();
 });
 
 beforeEach(async () => {

@@ -29,7 +29,7 @@ connectDB()
 
 // Define your routes
 app.get('/', (req, res) => {
-  res.json({ message: 'Bienvenue sur l\API WacDo' });
+  res.send('Bienvenue sur l\'API WacDo');
 });
 
 app.use('/api/products', productsRoute);

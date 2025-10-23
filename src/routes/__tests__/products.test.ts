@@ -2,7 +2,7 @@ import request from 'supertest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import { Product } from '../../models/Product';
-import { jest } from '@jest/globals';
+import { vi } from 'vitest';
 
 let mongoServer: MongoMemoryServer;
 let app: any;
@@ -11,7 +11,7 @@ let app: any;
 const currentRole = 'admin';
 const currentUserId = new mongoose.Types.ObjectId();
 
-jest.unstable_mockModule('../../middleware/auth', () => ({
+vi.mock('../../middleware/auth', () => ({
     authMiddleware: (req: any, res: any, next: any) => {
         req.user = { id: currentUserId, _id: currentUserId, role: currentRole };
         next();
@@ -19,8 +19,8 @@ jest.unstable_mockModule('../../middleware/auth', () => ({
 }));
 
 beforeAll(async () => {
-    const mod = await import('../../index');
-    app = mod.app;
+    const mod = await import('../../index.js');
+    app = mod.default;
 
     if (mongoose.connection.readyState !== 0) {
         await mongoose.disconnect();
@@ -34,7 +34,7 @@ beforeAll(async () => {
 afterAll(async () => {
     await mongoose.disconnect();
     await mongoServer.stop();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 });
 
 beforeEach(async () => {

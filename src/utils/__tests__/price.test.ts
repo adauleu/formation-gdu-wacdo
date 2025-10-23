@@ -1,4 +1,4 @@
-import type { IOrderItem } from "../../src/models/Order";
+import type { IOrderItem } from "../../models/Order";
 import { calculateTotalPrice } from "../price";
 
 describe('calculateTotalPrice', () => {

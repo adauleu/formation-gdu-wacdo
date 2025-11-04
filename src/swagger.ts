@@ -2,6 +2,14 @@ import path from 'path';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 
+const serverUrl = process.env.VERCEL
+    ? 'https://express-wacdo.vercel.app/api'
+    : 'http://localhost:8080/api';
+
+const apis = process.env.VERCEL
+    ? [path.join(__dirname, './routes/*.js')] // pour la prod (Vercel)
+    : [path.join(__dirname, './routes/*.ts')]; // pour le dev local
+
 const options: swaggerJSDoc.Options = {
     definition: {
         openapi: '3.0.0',
@@ -22,12 +30,7 @@ const options: swaggerJSDoc.Options = {
         },
         servers: [
             {
-                url: 'http://localhost:8080/api',
-                description: 'Serveur de développement local',
-            },
-            {
-                url: 'https://express-wacdo.vercel.app/api',
-                description: 'Serveur de production sur Vercel',
+                url: serverUrl,
             },
         ],
         tags: [
@@ -53,10 +56,7 @@ const options: swaggerJSDoc.Options = {
         }],
 
     },
-    apis: [
-        path.join(__dirname, './routes/*.js'), // pour la prod (Vercel)
-        path.join(__dirname, './routes/*.ts'), // pour le dev local
-    ], // Chemin vers les fichiers contenant les annotations Swagger
+    apis: apis, // Chemin vers les fichiers contenant les annotations Swagger
 };
 
 const swaggerSpec = swaggerJSDoc(options);

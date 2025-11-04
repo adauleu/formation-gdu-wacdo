@@ -1,12 +1,5 @@
 /**
  * @swagger
- * tags:
- *   name: Users
- *   description: Gestion des utilisateurs
- */
-
-/**
- * @swagger
  * /users:
  *   get:
  *     summary: Récupère tous les utilisateurs

@@ -1,3 +1,4 @@
+import path from 'path';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 
@@ -9,11 +10,6 @@ const options: swaggerJSDoc.Options = {
             version: '1.0.0',
             description: 'Documentation de l\'application WacDo',
         },
-        servers: [
-            {
-                url: `http://localhost:8080/api`,
-            },
-        ],
         components: {
             securitySchemes: {
                 bearerAuth: {
@@ -24,6 +20,16 @@ const options: swaggerJSDoc.Options = {
                 },
             },
         },
+        servers: [
+            {
+                url: 'http://localhost:8080/api',
+                description: 'Serveur de développement local',
+            },
+            {
+                url: 'https://express-wacdo.vercel.app/api',
+                description: 'Serveur de production sur Vercel',
+            },
+        ],
         tags: [
             {
                 name: 'Users',
@@ -47,7 +53,10 @@ const options: swaggerJSDoc.Options = {
         }],
 
     },
-    apis: ['./routes/*.route.ts'], // Chemin vers les fichiers contenant les annotations Swagger
+    apis: [
+        path.join(__dirname, './routes/*.js'), // pour la prod (Vercel)
+        path.join(__dirname, './routes/*.ts'), // pour le dev local
+    ], // Chemin vers les fichiers contenant les annotations Swagger
 };
 
 const swaggerSpec = swaggerJSDoc(options);

@@ -1,3 +1,12 @@
+
+import express from 'express';
+import { getUsers, loginUser, registerUser } from '../controllers/users.controller';
+import { body } from 'express-validator';
+import { hasRole } from '../middleware/role';
+import { authMiddleware } from '../middleware/auth';
+
+const router: express.Router = express.Router();
+
 /**
  * @swagger
  * /users:
@@ -103,14 +112,6 @@
  *       500:
  *         description: Erreur serveur
  */
-import express from 'express';
-import { getUsers, loginUser, registerUser } from '../controllers/users.controller';
-import { body } from 'express-validator';
-import { hasRole } from '../middleware/role';
-import { authMiddleware } from '../middleware/auth';
-
-const router: express.Router = express.Router();
-
 router.get('/', authMiddleware, hasRole('admin'), getUsers);
 router.post('/', registerUser);
 router.post('/login', body('email').isEmail(), loginUser);

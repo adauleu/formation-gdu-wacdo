@@ -3,10 +3,10 @@
     "target": "ESNext",
     "module": "NodeNext",
     "skipLibCheck": true,
+    "types": [
+      "vitest/globals"
+    ],
   },
-  "types": [
-    "vitest/globals"
-  ],
   "exclude": [
     "node_modules"
   ]

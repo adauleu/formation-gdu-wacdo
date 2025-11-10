@@ -8,7 +8,7 @@ export async function getProducts(req: AuthRequest, res: Response) {
         const products = await Product.find({}, 'name description price isAvailable').sort({ createdAt: -1 });
         res.status(200).json(products);
     } catch (error) {
-        res.status(500).json({ message: 'Error retrieving products', error });
+        res.status(500).json({ message: 'Error retrieving products', error: error.message });
     }
 }
 
@@ -25,7 +25,7 @@ export async function getProductById(req: AuthRequest, res: Response) {
         }
         res.status(200).json(product);
     } catch (error) {
-        res.status(500).json({ message: 'Error retrieving product', error });
+        res.status(500).json({ message: 'Error retrieving product', error: error.message });
     }
 }
 
@@ -56,7 +56,7 @@ export async function createProduct(req: AuthRequest, res: Response) {
         const savedProduct = await newProduct.save();
         res.status(201).json(savedProduct);
     } catch (error) {
-        res.status(500).json({ message: 'Error creating product', error });
+        res.status(500).json({ message: 'Error creating product', error: error.message });
     }
 }
 
@@ -83,7 +83,7 @@ export async function updateProduct(req: AuthRequest, res: Response) {
         res.status(200).json(updatedProduct);
     } catch (error) {
         console.error('Error updating product', error);
-        res.status(500).json({ message: 'Error updating product', error });
+        res.status(500).json({ message: 'Error updating product', error: error.message });
     }
 }
 
@@ -102,6 +102,6 @@ export async function deleteProduct(req: AuthRequest, res: Response) {
         res.status(200).json({ message: 'Product deleted successfully' });
     } catch (error) {
         console.error('Error deleting product', error);
-        res.status(500).json({ message: 'Error deleting product', error });
+        res.status(500).json({ message: 'Error deleting product', error: error.message });
     }
 }

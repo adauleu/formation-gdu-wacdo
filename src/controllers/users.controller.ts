@@ -35,7 +35,7 @@ export async function registerUser(req: AuthRequest, res: Response) {
         res.status(201).json(newUser);
     } catch (error) {
         console.error('Error registering user', error);
-        res.status(500).json({ message: 'Error registering user', error });
+        res.status(500).json({ message: 'Error registering user', error: error.message });
     }
 }
 
@@ -58,7 +58,7 @@ export async function loginUser(req: AuthRequest, res: Response) {
         res.status(200).json({ token, user });
     } catch (error) {
         console.error('Error logging in user', error);
-        res.status(500).json({ message: 'Error logging in user', error });
+        res.status(500).json({ message: 'Error logging in user', error: error.message });
     }
 }
 
@@ -67,6 +67,6 @@ export async function getUsers(req: Request, res: Response) {
         const users = await User.find({}, 'username role').sort({ createdAt: -1 });
         res.status(200).json(users);
     } catch (error) {
-        res.status(500).json({ message: 'Error retrieving users', error });
+        res.status(500).json({ message: 'Error retrieving users', error: error.message });
     }
 }

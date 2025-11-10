@@ -13,7 +13,7 @@ export async function getOrdersToPrepare(req: AuthRequest, res: Response) {
             .sort({ createdAt: 1 });
         res.status(200).json(orders);
     } catch (error) {
-        res.status(500).json({ message: 'Error retrieving orders', error });
+        res.status(500).json({ message: 'Error retrieving orders', error: error.message });
     }
 }
 
@@ -30,7 +30,7 @@ export async function getOrderById(req: AuthRequest, res: Response) {
         }
         res.status(200).json(order);
     } catch (error) {
-        res.status(500).json({ message: 'Error retrieving order', error });
+        res.status(500).json({ message: 'Error retrieving order', error: error.message });
     }
 }
 
@@ -139,7 +139,7 @@ export async function updateOrderStatus(req: AuthRequest, res: Response) {
         res.status(200).json(updatedOrder);
     } catch (error) {
         console.error('Error updating order', error);
-        res.status(500).json({ message: 'Error updating order', error });
+        res.status(500).json({ message: 'Error updating order', error: error.message });
     }
 }
 
@@ -159,6 +159,6 @@ export async function deleteOrder(req: AuthRequest, res: Response) {
         }
         res.status(200).json({ message: 'Order deleted successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Error deleting order', error });
+        res.status(500).json({ message: 'Error deleting order', error: error.message });
     }
 }

@@ -8,7 +8,7 @@ export async function getMenus(req: AuthRequest, res: Response) {
         const menus = await Menu.find({}, 'name price').populate('products', 'name').sort({ createdAt: -1 });
         res.status(200).json(menus);
     } catch (error) {
-        res.status(500).json({ message: 'Error retrieving menus', error });
+        res.status(500).json({ message: 'Error retrieving menus', error: error.message });
     }
 }
 
@@ -25,7 +25,7 @@ export async function getMenuById(req: AuthRequest, res: Response) {
         }
         res.status(200).json(menu);
     } catch (error) {
-        res.status(500).json({ message: 'Error retrieving menu', error });
+        res.status(500).json({ message: 'Error retrieving menu', error: error.message });
     }
 }
 
@@ -74,7 +74,7 @@ export function updateMenu(req: AuthRequest, res: Response) {
         }
         res.status(200).json(updatedMenu);
     }).catch(error => {
-        res.status(500).json({ message: 'Error updating menu', error });
+        res.status(500).json({ message: 'Error updating menu', error: error.message });
     });
 }
 
@@ -91,6 +91,6 @@ export async function deleteMenu(req: AuthRequest, res: Response) {
         }
         res.status(200).json({ message: 'Menu deleted successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Error deleting menu', error });
+        res.status(500).json({ message: 'Error deleting menu', error: error.message });
     }
 }

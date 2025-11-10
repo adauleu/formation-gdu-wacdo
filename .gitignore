@@ -140,4 +140,7 @@ vite.config.ts.timestamp-*
 
 # Uploaded files
 uploads
+
+#Other
 .vercel
+diagrams

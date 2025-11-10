@@ -36,15 +36,15 @@ const options: swaggerJSDoc.Options = {
         tags: [
             {
                 name: 'Users',
-                description: 'Gestion des utilisateurs (accessible à tous, sauf la route GET /users qui est réservée aux admins)'
+                description: 'Gestion des utilisateurs (accessible à tous, sauf les routes GET, PUT, DELETE /users qui sont réservées aux admins)'
             },
             {
                 name: 'Menus',
-                description: 'Gestion des menus composés (accessible uniquement aux admins)'
+                description: 'Gestion des menus composés (accessible uniquement aux admins sauf pour la récupération des menus)'
             },
             {
                 name: 'Products',
-                description: 'Gestion du catalogue de produits (accessible uniquement aux admins)'
+                description: 'Gestion du catalogue de produits (accessible uniquement aux admins sauf pour la récupération des produits)'
             },
             {
                 name: 'Orders',

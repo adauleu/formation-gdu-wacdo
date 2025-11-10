@@ -7,7 +7,6 @@ import { upload } from '../middleware/multer';
 const router: express.Router = express.Router();
 
 router.use(authMiddleware)
-router.use(hasRole('admin'))
 
 /**
  * @swagger
@@ -213,7 +212,7 @@ router.use(hasRole('admin'))
 
 router.get('/', getProducts);
 router.get('/:id', getProductById);
-router.put('/:id', upload.single('image'), updateProduct);
-router.post('/', upload.single('image'), createProduct);
-router.delete('/:id', deleteProduct);
+router.put('/:id', hasRole('admin'), upload.single('image'), updateProduct);
+router.post('/', hasRole('admin'), upload.single('image'), createProduct);
+router.delete('/:id', hasRole('admin'), deleteProduct);
 export default router;

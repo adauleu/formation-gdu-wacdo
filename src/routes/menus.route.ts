@@ -6,7 +6,6 @@ import { hasRole } from '../middleware/role';
 const router: express.Router = express.Router();
 
 router.use(authMiddleware)
-router.use(hasRole('admin'))
 
 /**
  * @swagger
@@ -208,7 +207,7 @@ router.use(hasRole('admin'))
 
 router.get('/', getMenus);
 router.get('/:id', getMenuById);
-router.post('/', createMenu);
-router.put('/:id', updateMenu);
-router.delete('/:id', deleteMenu);
+router.post('/', hasRole('admin'), createMenu);
+router.put('/:id', hasRole('admin'), updateMenu);
+router.delete('/:id', hasRole('admin'), deleteMenu);
 export default router;

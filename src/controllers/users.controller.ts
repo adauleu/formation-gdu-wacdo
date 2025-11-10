@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import { User } from '../models/User';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -68,5 +69,74 @@ export async function getUsers(req: Request, res: Response) {
         res.status(200).json(users);
     } catch (error) {
         res.status(500).json({ message: 'Error retrieving users', error: error.message });
+    }
+}
+
+export async function updateUser(req: AuthRequest, res: Response) {
+    const { id } = req.params;
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: 'Invalid user ID' });
+    }
+
+    try {
+        const { username, password, role } = req.body;
+
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (username && username !== user.username) {
+            const existing = await User.findOne({ username });
+            if (existing && !existing._id.equals(user._id)) {
+                return res.status(409).json({ message: 'Username already in use' });
+            }
+            user.username = username;
+        }
+
+        if (password) {
+            // Reuse password rules from registerUser
+            const schema = new (PasswordValidator as any)();
+            schema
+                .is().min(8)
+                .is().max(100)
+                .has().uppercase()
+                .has().lowercase()
+                .has().digits(1)
+                .has().not().spaces()
+                .is().not().oneOf(['Passw0rd', 'Password123']);
+
+            if (!schema.validate(password)) {
+                return res.status(400).json({ message: 'Password does not meet complexity requirements' });
+            }
+            const hashed = await bcrypt.hash(password, 10);
+            user.password = hashed;
+        }
+
+        if (role) user.role = role;
+
+        const updated = await user.save();
+        res.status(200).json(updated);
+    } catch (error) {
+        console.error('Error updating user', error);
+        res.status(500).json({ message: 'Error updating user', error: error.message });
+    }
+}
+
+export async function deleteUser(req: AuthRequest, res: Response) {
+    const { id } = req.params;
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: 'Invalid user ID' });
+    }
+
+    try {
+        const deleted = await User.findByIdAndDelete(id);
+        if (!deleted) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.status(200).json({ message: 'User deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting user', error);
+        res.status(500).json({ message: 'Error deleting user', error: error.message });
     }
 }

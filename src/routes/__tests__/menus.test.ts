@@ -81,7 +81,7 @@ describe('POST /menus (createMenu)', () => {
             .send({ name: 'MenuPost', products: [prod._id.toString()], price: 12.5 });
         expect(res.status).toBe(201);
         // Vérifier que le menu retourné contient un nom
-        expect(res.body.name || res.body).toBeDefined();
+        expect(res.body.name).toBe('MenuPost');
     });
 
     it('retourne 400 si les données sont invalides', async () => {
@@ -101,8 +101,7 @@ describe('DELETE /menus/:id (deleteMenu)', () => {
         const res = await request(app)
             .delete(`/api/menus/${menu._id}`)
             .set('Authorization', 'Bearer testtoken');
-        // accept 200 ou 204 selon implémentation
-        expect([200, 204].includes(res.status)).toBe(true);
+        expect(res.status).toBe(200);
     });
 
     it('retourne 404 si le menu à supprimer est absent', async () => {

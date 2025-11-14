@@ -75,7 +75,7 @@ describe('POST /products (createProduct)', () => {
             .set('Authorization', 'Bearer testtoken')
             .send({ name: 'NewProd', description: 'desc', price: 3.2, isAvailable: true });
         expect([201, 200].includes(res.status)).toBe(true);
-        expect(res.body.name || res.body).toBeDefined();
+        expect(res.body.name).toBe('NewProd');
     });
 
     it('retourne 400 si les données sont invalides', async () => {
@@ -83,7 +83,7 @@ describe('POST /products (createProduct)', () => {
             .post('/api/products')
             .set('Authorization', 'Bearer testtoken')
             .send({ name: '' });
-        expect([400, 422].includes(res.status)).toBe(true);
+        expect(res.status).toBe(400);
     });
 });
 
@@ -93,7 +93,7 @@ describe('DELETE /products/:id (deleteProduct)', () => {
         const res = await request(app)
             .delete(`/api/products/${product._id}`)
             .set('Authorization', 'Bearer testtoken');
-        expect([200, 204].includes(res.status)).toBe(true);
+        expect(res.status).toBe(200);
     });
 
     it('retourne 404 si le produit à supprimer est absent', async () => {
@@ -101,6 +101,6 @@ describe('DELETE /products/:id (deleteProduct)', () => {
         const res = await request(app)
             .delete(`/api/products/${fakeId}`)
             .set('Authorization', 'Bearer testtoken');
-        expect([404, 400].includes(res.status)).toBe(true);
+        expect(res.status).toBe(404);
     });
 });

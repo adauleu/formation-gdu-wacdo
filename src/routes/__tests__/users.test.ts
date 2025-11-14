@@ -78,11 +78,11 @@ describe('POST /users/login (loginUser)', () => {
         expect(res.body.token).toBeDefined();
     });
 
-    it('retourne 401 pour des identifiants invalides', async () => {
+    it('retourne 400 pour des identifiants invalides', async () => {
         const res = await request(app)
             .post('/api/users/login')
             .send({ email: 'doesnotexist@example.com', password: 'wrong' });
-        expect([400, 401].includes(res.status)).toBe(true);
+        expect(res.status).toBe(400);
     });
 });
 
